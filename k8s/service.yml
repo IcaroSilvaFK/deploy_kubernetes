@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: serversvc
+spec:
+  #função para o serviço funcionar como um Load Balancer
+  type: LoadBalancer
+  selector:
+    app: server
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

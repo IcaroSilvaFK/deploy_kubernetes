@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: server
+          image: whyyzy/deploy-k8s:latest
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          #startup probe
+          startupProbe:
+            httpGet:
+              #sempre criar um endpoint /health para verificar se o deploy foi executado corretamente
+              path: /
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 10
+
+          #fica sempre verificando se o app esta executando corretamente
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 2
+            timeoutSeconds: 5
+
+          #fica sempre verificando se o app esta executando corretamente e se não estiver da restart
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 5
+            timeoutSeconds: 5
+            #se 1 tentativa der certo considera que o sistema esta no ar
+            successThreshold: 1
+
+          ports:
+            - containerPort: 8080
